@@ -1,0 +1,61 @@
+
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{
+    border-color:red;
+    border-style:solid;
+    border-width:2px;
+    font-family:Arial, sans-serif;
+    font-size:11px;
+    overflow:hidden;
+    padding:5px 5px;
+    word-break:normal;
+    
+}
+.tg th{
+    border-color:red;
+    border-style:solid;
+    border-width:2px;
+    font-family:Arial,sans-serif;
+    font-size:11px;
+    font-weight:normal;
+    overflow:hidden;
+    padding:10px 5px;
+    word-break:normal;
+    text-align:center;
+}
+.tg .tg-0lax{
+    vertical-align:top
+    
+}
+.print-format td, .print-format th {
+    vertical-align: top !important;
+    padding: 1px !important;
+}
+.table-bordered,tr,th,td {
+    border: 1px solid black!important;
+    font-size:11px!important;
+}
+.table{
+    margin-top:0px!important;
+    margin-bottom:0px!important;
+    
+    border-collapse: hidden !important;
+}
+table.table-bordered.table-hover{
+    border-collapse: hidden !important;
+    margin:0px 0px!important;
+}
+.print-heading{
+    display:none!important;
+}
+[document-status] {
+   display:none!important;
+}
+
+.print-format {
+    font-family: 'Open Sans', sans-serif;
+        margin-left:2mm;
+        margin-top:2mm;
+        margin-right: 2mm;
+        margin-bottom:2mm;
+}
