@@ -1,0 +1,471 @@
+
+
+<table class="tg" width="100%" style="margin-top:1px;">
+        <tr>
+<!--           <div border="1px">-->
+<!--    <div id="header-html" class="hidden-pdf">-->
+<!--        <div class="row">-->
+<!--            <div class="col-xs-0">-->
+        
+<!--        </div>-->
+        
+          
+<!--    </div>-->
+
+           
+    <!--<p class="text-right" style="font-size:10px"><b>Tax Invoice</b></p>-->
+    <p class="text-center"><b>Quotation / Proforma Invoice</b></p>
+  
+            </td>
+        </tr>
+        
+        <tr>
+            <td style="border-bottom:0px solid black;width:50%">
+                <p align="left">Quotation / Proforma Invoice No.:<b>{{doc.name}}</b></p>
+            </td>
+            <td><p><b>Date : {{doc.transaction_date}}</b></p></td>
+        </tr>
+            <tr>
+            <td colspan=2 align="center">
+                <font size="2px"><b>{{doc.company}}</b></font><br>													
+                {{doc.get_formatted("company_address_display")}}
+   </td>
+        </tr> 
+<tbody>
+      <tr>
+        <td class="tg-0lax" width="50%" style="padding-top:0px;">
+              <p><b>Billing Address :</b></p>
+                <p><b>{{doc.customer_name}}</b></p>
+                <p> {{doc.address_display}}</p>
+                <p> Place of Supply: {{doc.place_of_supply}}</p>
+        </td>
+        <td width="50%">
+            <b>Shipping Address:</b>
+            <p><b>{{doc.customer_name}}</b></p>
+            {{doc.shipping_address}}</td>
+    </tr>
+         </tbody>
+    </table>
+    <table class="tg" width="100%">
+        <thead>
+          <tr style="text-align:center">
+            <th class="tg-0lax" ><b>Sr No</b></th>
+            <th class="tg-0lax" ><b>Item Code</b></th>
+            <th class="tg-0lax" align="center" style="width:30%"><b>Item Description</b></th>
+            <th class="tg-0lax" align="center" style="width:8%;"><b>HSN/SAC</b></th>
+            <th class="tg-0lax" align="center"><b>Tax Rate</b></th>
+            <th class="tg-0lax"><b>Qty</b></th>
+            <th class="tg-0lax" align="center" style="width:5%;"><b>Disc<br>%</b></th>
+            <th class="tg-0lax" style="width:8%;"><b>Rate</b></th>
+            <th class="tg-0lax"><b>Amount</b></th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for item in doc.items %}
+          <tr>
+           <td class="tg-0lax" style="text-align:center;">{{item.idx}}</td>
+           <td class="tg-0lax" style="text-align:center;">{{item.get_formatted("item_code")}}</td>
+            <td class="tg-0lax">{{item.get_formatted("description")}}</td>
+            <td class="tg-0lax" style="text-align:right;">{{item.gst_hsn_code}}</td>
+            <td class="tg-0lax" style="white-space:nowrap;text-align:center;">{{frappe.db.get_value('Item Tax Template', item.item_tax_template, 'gst_rate') or " "}}%</td>
+            <td class="tg-0lax" style="white-space:nowrap;text-align:center;">{% set value = 100 %}<b>{{ "{:,.3f}".format(item.qty|float)|replace('-', ' ') }}
+</b></td>
+            <!--{{'%0.3f'| format(item.qty|float)}}-->
+            <td class="tg-0lax" style="text-align:center;">{%if item.discount_percentage!=0 %}{{item.discount_percentage}} {% else %} - {% endif %}</td>
+            <td class="tg-0lax" style="white-space:nowrap;text-align:right;"><b>{{frappe.format(item.rate,{'fieldtype':'Currency'})}}</b></td>
+            <td class="tg-0lax" style="white-space:nowrap;text-align:right;" ><b>{{frappe.format(item.amount,{'fieldtype':'Currency'})|replace('-','')}}</b></td>
+          </tr>
+          {% endfor %}
+          
+    {% if doc.items|length == 1  -%}
+<tr>
+	<td height="170"></td>
+	<td height="170"></td>
+	<td height="170"></td>
+	<td height="170"></td>
+	<td height="170"></td>
+	<td height="170"></td>
+	<td height="170"></td>
+	<td height="170"></td>
+	<td height="170"></td>
+</tr>
+{% endif %}    
+          
+          
+          <tr>    <!--</thead>-->
+    
+            <td class="tg-0lax" colspan="4"><b>TOTAL</b></td>
+            <td class="tg-0lax" align="center"></td><!--|int-->
+            <td class="tg-0lax" style="text-align:center"><b>{{"{:,.3f}". format(doc.total_qty|float)|replace('-','')}}</b></td>
+            <!--{{'%0.3f'| format(doc.total_qty|float)}}-->
+            <td class="tg-0lax" ></td>
+            <td class="tg-0lax"></td>
+            <td class="tg-0lax" style="white-space:nowrap;text-align:right;width:13%"><b>{{doc.get_formatted("total")|replace("-"," ")}}</b></td>
+          </tr>
+<table class="tg"  width=100% height=100% style="border:1px solid black; font-size 9px; ">
+    <tbody class="thikbody">
+{% if doc.taxes|length == 0 -%}
+
+<tr>
+    <tr>
+        <td style="text-align:left;border-right:0px" rowspan=9 width=64%>Amount In Words:<br>**** <b>{{doc.get_formatted("in_words")| replace(","," ")}}</b><br> &nbsp;&nbsp;&nbsp;E. & O.E<br>
+        <p>Remarks: {{doc.get_formatted("custom_remarkss")}}</p>
+</td>
+   
+    <td width=23% style="text-align:right;"><b>Discount Amount {%- if doc.additional_discount_percentage -%} ({{doc.additional_discount_percentage}}%)</b>{% endif %}</td>
+    <td width=13% style="text-align:right;"><b>(-) {{ doc.get_formatted("discount_amount", doc) }}</b>&nbsp;</td>
+    </tr>
+    
+    <tr>
+        
+    <td width=23% style="text-align:right;"><b>Grand Total </b></td>
+    <td width=13% style="text-align:right;"><b>{{ doc.get_formatted("grand_total", doc)| replace("-","")}}</b>&nbsp;</td>
+</tr>
+<tr>
+
+    <td width=23% style="text-align:right;"><b>Rounding Adjustment </b></td>
+    <td width=13% style="text-align:right;"><b>{{ doc.get_formatted("base_rounding_adjustment", doc)|replace('-','') }}</b>&nbsp;</td>
+</tr>
+
+<tr>
+
+    <td width=23% style="text-align:right;"><b>Total Value </b></td>
+    <td width=13% style="text-align:right;"><b>{{ doc.get_formatted("base_rounded_total", doc) }}</b>&nbsp;</td>
+</tr>
+
+    {%- else %}
+
+{% if doc.taxes|length == 1 -%}
+<tr>
+    {%- for taxes in doc.taxes -%}
+    {% if loop.index == 1 -%}
+    <tr>
+        <td style="text-align:left;border-right:0px" rowspan=6 width=64%>Amount In Words:<br>**** <b>{{doc.get_formatted("in_words")| replace(","," ")}}</b><br> &nbsp;&nbsp;&nbsp;E. & O.E
+        <br>
+        <p>Remarks: {{doc.get_formatted("custom_remarkss")}}</p>
+        </td>
+    </tr>
+    
+    <tr>
+    <td width=23% style="text-align:right;"><b>Discount Amount {%- if doc.additional_discount_percentage -%} ({{doc.additional_discount_percentage}}%)</b>{% endif %}</td>
+    <td width=13% style="text-align:right;"><b>(-) {{ doc.get_formatted("discount_amount", doc) }}</b>&nbsp;</td>
+</tr>
+
+    <tr>
+    <td width=23% style="text-align:right;"><b>{{ taxes.description }}</b></td>
+    <td width=13% style="text-align:right;">{{ taxes.get_formatted("tax_amount")|replace('-','') }}&nbsp;</td>
+    </tr>
+
+    {%- else %}
+    <tr>
+    <td width=23% style="text-align:right;"><b>{{ taxes.description }}</b></td>
+    <td width=13% style="text-align:right;">{{ taxes.get_formatted("tax_amount")|replace('-','') }}&nbsp;</td>
+    </tr>
+    {%- endif %}
+    {%- endfor -%}
+    
+    <tr>
+
+    <td width=23% style="text-align:right;"><b>Grand Total </b></td>
+    <td width=13% style="text-align:right;"><b>{{ doc.get_formatted("grand_total", doc)|replace('-','') }}</b>&nbsp;</td>
+</tr>
+
+<tr>
+
+    <td width=23% style="text-align:right;"><b>Rounding Adjustment </b></td>
+    <td width=13% style="text-align:right;"><b>{{ doc.get_formatted("base_rounding_adjustment", doc)|replace('-','') }}</b>&nbsp;</td>
+</tr>
+
+<tr>
+
+    <td width=23% style="text-align:right;"><b>Total Value </b></td>
+    <td width=13% style="text-align:right;"><b>{{ doc.get_formatted("base_rounded_total", doc)|replace('-','') }}</b>&nbsp;</td>
+</tr>
+
+{% elif doc.taxes|length == 2 -%}
+<tr>
+    {%- for taxes in doc.taxes -%}
+    {% if loop.index == 1 -%}
+    
+    <tr>
+        <td style="text-align:left;border-right:0px" rowspan=6 width=64%>Amount In Words:<br>**** <b>{{doc.get_formatted("in_words")| replace(","," ")}}</b><br>&nbsp;&nbsp;&nbsp;E. & O.E<br>
+        <p>Remarks: {{doc.get_formatted("custom_remarkss")}}</p>
+</td>
+    <td width=23% style="text-align:right;"><b>Discount Amount ({{doc.additional_discount_percentage}}%)</b></td>
+    <td width=13% style="text-align:right;"><b> {{ doc.get_formatted("discount_amount", doc) }}</b>&nbsp;</td>
+    
+    </tr>
+    <tr>
+    <td width=23% style="text-align:right;"><b>{{ taxes.description }}</b></td>
+    <td width=13% style="text-align:right;" width=15%>{{ taxes.get_formatted("tax_amount")|replace('-','') }}&nbsp;</td>
+    </tr>
+    {%- else %}
+    
+    <tr>
+        
+        <td width=23% style="text-align:right;"><b>{{ taxes.description }}</b></td>
+        <td width=13% style="text-align:right;">{{ taxes.get_formatted("tax_amount")|replace('-','') }}&nbsp;</td>
+</tr>
+    {%- endif %}
+    {%- endfor -%}
+    
+<tr>
+
+    <td width=23% style="text-align:right;"><b>Grand Total </b></td>
+    <td width=13% style="text-align:right;"><b>{{ doc.get_formatted("grand_total", doc)| replace("-","")}}</b>&nbsp;</td>
+</tr>
+
+<tr>
+
+    <td width=23% style="text-align:right;"><b>Rounding Adjustment </b></td>
+    <td width=13% style="text-align:right;"><b>{{ doc.get_formatted("base_rounding_adjustment", doc) }}</b>&nbsp;</td>
+</tr>
+<tr>
+
+    <td width=23% style="text-align:right;"><b>Total Value </b></td>
+    <td width=13% style="text-align:right;"><b>{{ doc.get_formatted("base_rounded_total", doc)|replace('-','') }}</b>&nbsp;</td>
+</tr>
+
+{% elif doc.taxes|length == 3 -%}
+<tr>
+    {%- for taxes in doc.taxes -%}
+    {% if loop.index == 1 -%}
+    <tr>
+        <td style="text-align:left;border-right:0px" rowspan=7 width=64%>Amount In Words:<br>**** <b>{{doc.get_formatted("in_words")| replace(","," ")}}</b><br> &nbsp;&nbsp;&nbsp;E. & O.E <br>
+        <p>Remarks: {{doc.get_formatted("custom_remarkss")}}</p>
+        </td>
+    <td width=23% style="text-align:right;"><b>Discount Amount ({{doc.additional_discount_percentage}}%)</b></td>
+    <td width=13% style="text-align:right;"><b>(-) {{ doc.get_formatted("discount_amount", doc) }}</b>&nbsp;</td>
+    
+    </tr>
+    <tr>
+        
+        <td width=23% style="text-align:right;"><b>{{ taxes.description }}</b></td>
+        <td width=13% style="text-align:right;" width=15%>{{ taxes.get_formatted("tax_amount")|replace('-','') }}&nbsp;</td>
+</tr>
+    {%- else %}
+    <tr>
+    <td width=23% style="text-align:right;"><b>{{ taxes.description }}</b></td>
+    <td width=13% style="text-align:right;">{{ taxes.get_formatted("tax_amount")|replace('-','') }}&nbsp;</td>
+    </tr>
+    {%- endif %}
+    {%- endfor -%}
+    
+    
+    <tr>
+
+    <td width=23% style="text-align:right;"><b>Grand Total </b></td>
+    <td width=13% style="text-align:right;"><b>{{ doc.get_formatted("grand_total", doc)|replace('-','') }}</b>&nbsp;</td>
+</tr>
+
+<tr>
+
+    <td width=23% style="text-align:right;"><b>Rounding Adjustment </b></td>
+    <td width=13% style="text-align:right;"><b>{{ doc.get_formatted("base_rounding_adjustment", doc) }}</b>&nbsp;</td>
+</tr>
+<tr>
+
+    <td width=23% style="text-align:right;"><b>Total Value </b></td>
+    <td width=13% style="text-align:right;"><b>{{ doc.get_formatted("base_rounded_total", doc)|replace('-','') }}</b>&nbsp;</td>
+</tr>
+{% else -%}
+<tr>
+    {%- for taxes in doc.taxes -%}
+    {% if loop.index == 1 -%}
+    <tr>
+        <td style="text-align:left;border-right:0px" rowspan=9 width=64%>Amount In Words:<br>**** <b>{{doc.get_formatted("in_words")| replace(","," ")}}</b><br> &nbsp;&nbsp;&nbsp;E. & O.E <br>
+        <p>Remarks: {{doc.get_formatted("custom_remarkss")}}</p>
+        </td>
+    <td width=23% style="text-align:right;"><b>Discount Amount ({{doc.additional_discount_percentage}}%)</b></td>
+    <td width=13% style="text-align:right;"><b>(-) {{ doc.get_formatted("discount_amount", doc) }}</b>&nbsp;</td>
+    
+    </tr>
+    <tr>
+        <td width=23% style="text-align:right;" ><b>{{ taxes.description }}</b></td>
+        <td width=13% style="text-align:right;" >{{ taxes.get_formatted("tax_amount")|replace('-','') }}&nbsp;</td>
+</tr>
+    {%- else %}
+    <tr>
+    <td width=23% style="text-align:right;"><b>{{ taxes.description }}</b></td>
+    <td width=13% style="text-align:right;" >{{ taxes.get_formatted("tax_amount")|replace('-','') }}&nbsp;</td>
+    </tr>
+    {%- endif %}
+    {%- endfor -%}
+    
+    <tr>
+
+    <td width=23% style="text-align:right;"><b>Grand Total </b></td>
+    <td width=13% style="text-align:right;"><b>{{ doc.get_formatted("grand_total", doc)|replace('-','') }}</b>&nbsp;</td>
+</tr>
+
+<tr>
+
+    <td width=23% style="text-align:right;"><b>Rounding Adjustment </b></td>
+    <td width=13% style="text-align:right;"><b>{{ doc.get_formatted("base_rounding_adjustment", doc) }}</b>&nbsp;</td>
+</tr>
+<tr>
+
+    <td width=23% style="text-align:right;"><b>Total Value </b></td>
+    <td width=13% style="text-align:right;border-right:1px solid black;"><b>{{ doc.get_formatted("base_rounded_total", doc)|replace('-','') }}</b>&nbsp;</td>
+</tr>
+{%- endif %}
+    {%- endif %}
+</tbody>
+</table>
+    </table>
+    <div class="tax-break-up">
+            {% if doc.gst_breakup_table %} {{doc.gst_breakup_table}}{% endif %}
+            
+{% set tax = namespace() %}
+{% set tax.total = 0 %}
+{% set tax.cgst_amount = 0 %}
+{% set tax.sgst_amount = 0 %}
+{% set tax.igst_amount = 0 %}
+
+
+{% if tax_breakup_data %}
+    {% set has_cgst_sgst = tax_breakup_data[0].get("CGST") and tax_breakup_data[0].get("SGST") %}
+    {% set has_igst = tax_breakup_data[0].get("IGST") %}
+
+    <table class="tg-0lax" width="100%" style="text-align:right;font-size:10px">
+        <thead>
+            <tr>
+                <th class="tg-0lax" rowspan="2" style="text-align:center;width:10%"><b>HSN/SAC Code</b></th>
+                <th class="tg-0lax" rowspan="2" style="text-align:center;width:12%"><b>Taxable Value</b></th>
+
+                {% if has_cgst_sgst %}
+                    <th class="tg-0lax" colspan="2" style="text-align:center;width:22%"><b>CGST</b></th>
+                    <th class="tg-0lax" colspan="2" style="text-align:center;width:22%"><b>SGST/UTGST</b></th>
+                {% elif has_igst %}
+                    <th class="tg-0lax" colspan="2" style="text-align:center;width:22%"><b>IGST</b></th>
+                {% endif %}
+                <th class="tg-0lax" rowspan="2" style="text-align:center;width:22%"><b>Total Tax Amount</b></th>
+            </tr>
+            <tr>
+                {% if has_cgst_sgst %}
+                    <th class="tg-0lax" style="text-align:center;width:8%"><b>Rate %</b></th>
+                    <th class="tg-0lax" style="text-align:center;width:8%"><b>Amount</b></th>
+                    <th class="tg-0lax" style="text-align:center;width:8%"><b>Rate %</b></th>
+                    <th class="tg-0lax" style="text-align:center;width:8%"><b>Amount</b></th>
+                {% elif has_igst %}
+                    <th class="tg-0lax" style="text-align:center;width:8%"><b>Rate %</b></th>
+                    <th class="tg-0lax" style="text-align:center;width:8%"><b>Amount</b></th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% set is_doc_return = doc.get('is_return') %}
+            {% for row in tax_breakup_data %}
+                <tr>
+                    <td style="text-align:center; border:1px solid black;">{{ row["HSN/SAC"] }}</td>
+                    <td style="text-align:right; border:1px solid black;">
+                        {% set tax.total = tax.total + (row["Taxable Amount"] | abs) %}
+                        {% if is_doc_return %}
+                            {{ frappe.utils.fmt_money(row["Taxable Amount"] | abs, None, "INR") }}
+                        {% else %}
+                            {{ frappe.utils.fmt_money(row["Taxable Amount"], None, "INR") }}
+                        {% endif %}
+                    </td>
+
+                    {% if has_cgst_sgst %}
+                        {% set cgst = row.get("CGST", {"tax_rate": 0, "tax_amount": 0}) %}
+                        <td style="text-align:center; border:1px solid black;">
+                             {{'%0.2f'| format(cgst.tax_rate|float)}}
+                        </td>
+                        <td style="text-align:right; border:1px solid black;">
+                            {% set tax.cgst_amount = tax.cgst_amount + (cgst.tax_amount | abs) %}
+                            {% if is_doc_return %}
+                                {{ frappe.utils.fmt_money(cgst.tax_amount | abs, None, "INR") }}
+                            {% else %}
+                                {{ frappe.utils.fmt_money(cgst.tax_amount, None, "INR") }}
+                            {% endif %}
+                        </td>
+                        
+                        {% set sgst = row.get("SGST", {"tax_rate": 0, "tax_amount": 0}) %}
+                        <td style="text-align:center; border:1px solid black;">
+                             {{'%0.2f'| format(sgst.tax_rate|float)}}
+                        </td>
+                        <td style="text-align:right; border:1px solid black;">
+                            {% set tax.sgst_amount = tax.sgst_amount + (sgst.tax_amount | abs) %}
+                            {% if is_doc_return %}
+                                {{ frappe.utils.fmt_money(sgst.tax_amount | abs, None, "INR") }}
+                            {% else %}
+                                {{ frappe.utils.fmt_money(sgst.tax_amount, None, "INR") }}
+                            {% endif %}
+                        </td>
+                    {% elif has_igst %}
+                        {% set igst = row.get("IGST", {"tax_rate": 0, "tax_amount": 0}) %}
+                        <td style="text-align:center; border:1px solid black;">
+                            {{'%0.2f'| format(igst.tax_rate|float)}}
+                        </td>
+                        <td style="text-align:right; border:1px solid black;">
+                            {% set tax.igst_amount = tax.igst_amount + (igst.tax_amount | abs) %}
+                            {% if is_doc_return %}
+                                {{ frappe.utils.fmt_money(igst.tax_amount | abs, None, "INR") }}
+                            {% else %}
+                                {{ frappe.utils.fmt_money(igst.tax_amount, None, "INR") }}
+                            {% endif %}
+                        </td>
+                    {% endif %}
+
+                    <td class="tg-0lax" style="text-align:right; border:1px solid black">
+                        {% if has_cgst_sgst %}
+                            {% set total_tax_amount = cgst.tax_amount + sgst.tax_amount %}
+                        {% elif has_igst %}
+                            {% set total_tax_amount = igst.tax_amount %}
+                        {% endif %}
+                        {% if is_doc_return %}
+                            {{ frappe.utils.fmt_money(total_tax_amount | abs, None, "INR") }}
+                        {% else %}
+                            {{ frappe.utils.fmt_money(total_tax_amount, None, "INR") }}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+
+    </table>
+{% endif %}
+
+    </div>
+    
+<table class="tg" width="100%">
+    <tr>
+        <td rowspan=2 width="50%"><b>Terms & Condition:</b></td>
+        <td><b>Company Account Details:</b>
+        <p>BANK A/C HOLDER'S NAME: </p>
+        <p>BANK NAME: </p>
+        <p>A/C NO.:</p>
+        <p>IFSC CODE : </p>
+        <p>BRANCH CODE : </p>
+        <p>SWIFT CODE : </p>
+        </td>
+    </tr>
+    <tr>
+        <td><p style="text-align:left;font-size:13px"><b>For {{doc.company}}</b></p>
+                        <div class="row" style="padding-top:25px">
+                            <div class="col-xs-11">
+                               Verified By &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Authorised Signatory
+                            </div>
+                        </div></td>
+    </tr>
+</table>
+        
+        <div style="text-align:center;">SUBJECT TO MUMBAI JURISDICTION</div>
+{% if print_settings.repeat_header_footer %}
+		<div id="header-html" class="hidden-pdf" style="margin-top:0px;text-align:center;">
+		    
+       </div>
+	<div id="footer-html" class="hidden-pdf" style="margin-top:0px">
+		<p class="text-center small page-number visible-pdf">
+			{{ _("Page {0} of {1}").format('<span class="page"></span>', '<span class="topage"></span>') }}
+			
+		</p>
+	</div>
+	{% endif %}  
+
+      <div class = "page-break"></div>
+</div>
